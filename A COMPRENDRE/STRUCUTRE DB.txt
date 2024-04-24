@@ -1,0 +1,146 @@
+					Structure de la base de donnée
+
+CREATE TABLE utilisateurs (
+    id_utilisateur INT PRIMARY KEY,
+    nom VARCHAR(255),
+    code_etudiant INT(6), -- Correction ici
+    classe_utilisateur VARCHAR(50),
+    departement_utilisateur VARCHAR(100),
+    numero_de_tel VARCHAR(20),
+    email VARCHAR(255),
+    mot_de_passe VARCHAR(255),
+    date_inscription DATE,
+    statut ENUM('actif', 'inactif')
+);
+
+
+Table "transactions" :
+CREATE TABLE transactions (
+    id_transaction INT PRIMARY KEY,
+    id_utilisateur INT,
+    montant DECIMAL(10, 2),
+    methode_paiement VARCHAR(50),
+    statut_validation ENUM('en attente', 'confirmé'),
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateurs(id_utilisateur)
+);
+
+CREATE TABLE candidats (
+    id_candidat INT PRIMARY KEY,
+    nom_candidat VARCHAR(255),
+    code_candidat INT(6),
+    video BLOOB,
+    description TEXT,
+    departement_candidat VARCHAR(100),
+    classe_candidat VARCHAR(50)
+);
+
+
+Table "votes" :
+CREATE TABLE votes (
+    id_vote INT PRIMARY KEY,
+    id_utilisateur INT,
+    id_candidat INT,
+    date_vote DATE,
+    nombre_vote_obtenus INT,
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateurs(id_utilisateur),
+    FOREIGN KEY (id_candidat) REFERENCES candidats(id_candidat)
+);
+
+Table "notification" :
+CREATE TABLE notification (
+    id_notification INT PRIMARY KEY,
+    id_utilisateur INT,
+    message TEXT,
+    date_notification DATE,
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateurs(id_utilisateur)
+);
+
+
+CREATE TABLE activites_application (
+    id_activite INT PRIMARY KEY,
+    type_activite VARCHAR(100),
+    id_utilisateur INT,
+    id_candidat INT,
+    date_activite DATE, -- Correction ici
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateurs(id_utilisateur),
+    FOREIGN KEY (id_candidat) REFERENCES candidats(id_candidat)
+);
+
+
+Table "sessions" :
+CREATE TABLE sessions (
+    id_session INT PRIMARY KEY,
+    id_utilisateur INT,
+    jeton_session VARCHAR(255),
+    date_creation DATETIME,
+    date_expiration DATETIME,
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateurs(id_utilisateur)
+); 
+
+CREATE TABLE paiements_valides (
+    id_paiement INT PRIMARY KEY,
+    id_utilisateur INT,
+    id_transaction INT,
+    montant DECIMAL(10, 2),
+    date_validation DATE,
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateurs(id_utilisateur),
+    FOREIGN KEY (id_transaction) REFERENCES transactions(id_transaction)
+);
+
+
+CREATE TABLE admins (
+    id_admin INT PRIMARY KEY,
+    nom VARCHAR(255),
+    classe_admin VARCHAR(255),
+    code_admin INT(6),
+    email VARCHAR(255),
+    mot_de_passe VARCHAR(255)
+);
+
+
+			Fonctionnalitéé de l’application IAM_VOTE
+					
+					ADMIN INTERFACE
+
+1.	Tableau de bord :
+•	Affiche un résumé des activités récentes de l'application, comme le nombre total de candidats, le nombre d'utilisateurs enregistrés, les paiements reçus, etc.
+2.	Gestion des candidats :
+•	Permet à l'administrateur d'ajouter, de modifier ou de supprimer des profils de candidats.
+•	Possibilité de d’ajouter des photos et des vidéos, saisir des descriptions et des informations pertinentes sur les candidats.
+3.	Gestion des utilisateurs :
+•	Affiche une liste des utilisateurs enregistrés avec leurs informations de base (nom, code_etudiant, classe, departement, numero_de_tel et date d'inscription, etc.).
+•	Permet à l'administrateur de bloquer, debloquer, de modifier ou de supprimer des comptes d'utilisateurs si nécessaire.
+4.	Gestion des paiements :
+•	Fournit un aperçu des paiements effectués par les utilisateurs pour accéder au processus de vote.
+•	Permet à l'administrateur de vérifier l'état des paiements, de confirmer les paiements valides en ajoutant l’id de transaction du paiement que l’utilisateur lui a envoyer et de l’inserer dans la base de donnée.
+5.	Modération du contenu :
+•	Donne à l'administrateur la possibilité de modifier supprimer du contenu d’un candidat .
+6.	Statistiques et rapports :
+•	Fournit des statistiques détaillées sur l'utilisation de l'application, les performances des candidats, les résultats des votes, etc.
+•	Affiche l’id de transaction de l’user
+•	Permet à l'administrateur de générer des rapports personnalisés pour analyser les tendances et prendre des décisions éclairées.
+7.	Paramètres de l'application :
+•	Permet à l'administrateur de gérer les paramètres de l'application tels que les notifications par e-mail, les préférences de modération, les tarifs de participation, etc.
+•	Donne à l'administrateur un contrôle sur la manière dont l'application fonctionne et s'adapte aux besoins changeants.
+
+				USER INTERFACE
+
+1.	Page d'accueil :
+•	L'utilisateur arrive sur la page d'accueil où il est accueilli par une présentation chaleureuse du concours Miss/Mister et des instructions pour participer.
+2.	Pages de connexion et d'inscription :
+•	L'utilisateur peut choisir de créer un compte ou de se connecter à son compte existant pour accéder aux fonctionnalités de l'application. INSCRIPTION OU CONECTION REDIRIGE VERS  LA PAGE REGLE
+•	Rediriger vers une page contenant les regles du vote et avoir un bouton [participer] et une fois cliquer dessus, si son id de transaction WAVE OU ORANGE MONEY existe dans la base de donnée, 
+3.	Processus de paiement :
+•	Une fois connecté, si l'utilisateur n'a pas encore payé les frais de participation, il est redirigé vers la page de paiement où il peut effectuer le paiement requis pour accéder au processus de vote.
+4.	Liste des candidats :
+•	Après avoir payé, l'utilisateur est redirigé vers la liste des candidats où il peut parcourir les profils des candidats en compétition et examiner leurs photos, vidéos et descriptions.
+5.	Profil du candidat :
+•	L'utilisateur peut cliquer sur le profil individuel de chaque candidat pour voir plus de détails et décider pour qui voter.
+6.	Formulaire de vote :
+•	À partir du profil du candidat, l'utilisateur peut accéder au formulaire de vote ou au bouton de vote pour exprimer son choix pour son candidat préféré.
+7.	Notifications :
+•	Pendant tout ce processus, l'utilisateur peut consulter les notifications importantes telles que les nouvelles candidatures, les résultats des votes, etc., et gérer ses préférences de notification si nécessaire.
+8.	Pages de compte utilisateur :
+•	Une fois que l'utilisateur a voté, il est automatiquement rediriger vers une page lui montrant le condidat pour qui il a voté. 
+
+"
